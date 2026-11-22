@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      What Changed - Private, Client-Side & Instant Text Diff Checker
+    </title>
+    <meta
+      name="description"
+      content="What Changed - Free, fast, and 100% private text diff checker running entirely in your browser. Side-by-side split view, unified view, inline word-level diff, and large file support. No server uploads."
+    />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="apple-touch-icon" href="favicon.png" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Site Header -->
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand-wrap">
+          <div class="brand-icon" aria-hidden="true">
+            <img
+              src="favicon.png"
+              alt="What Changed Logo"
+              width="34"
+              height="34"
+              onerror="
+                this.style.display = 'none';
+                this.nextElementSibling.style.display = 'block';
+              "
+            />
+            <svg
+              style="display: none"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="9" y1="13" x2="15" y2="13"></line>
+              <line x1="9" y1="17" x2="13" y2="17"></line>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>What Changed</h1>
+            <p>
+              Instant client-side diff comparison &middot; 100% private in your
+              browser
+            </p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button
+            id="btn-sample-data"
+            class="btn btn-secondary btn-sm"
+            title="Load sample code to try out diff checker"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path
+                d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+              ></path>
+            </svg>
+            Sample Data
+          </button>
+          <button
+            id="btn-theme-toggle"
+            class="btn btn-secondary btn-icon"
+            title="Toggle dark/light theme"
+            aria-label="Toggle theme"
+          >
+            <svg
+              id="theme-icon-sun"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg
+              id="theme-icon-moon"
+              style="display: none"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Screen 1: Input Screen -->
+      <section id="input-screen" class="screen">
+        <div class="panels-grid">
+          <!-- Left Panel: Original Text -->
+          <div class="panel-card" id="left-panel">
+            <div class="drop-overlay">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Drop plain-text file here to load
+            </div>
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <span class="panel-title">Original Text</span>
+                <span
+                  id="left-file-badge"
+                  class="file-badge"
+                  style="display: none"
+                >
+                  <span id="left-file-name"></span>
+                  <button id="left-file-remove" title="Remove file reference">
+                    &times;
+                  </button>
+                </span>
+              </div>
+              <div class="panel-actions">
+                <label
+                  class="btn btn-secondary btn-sm"
+                  title="Upload plain-text file (.txt, .md, .json, .csv, .html, .css, .js, .xml, .log, etc.)"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Upload file
+                  <input
+                    type="file"
+                    id="left-file-input"
+                    hidden
+                    accept=".txt,.md,.json,.csv,.html,.css,.js,.xml,.log,.ts,.py,.yml,.yaml,.sql,.sh,.env,text/*"
+                  />
+                </label>
+                <button
+                  id="btn-clear-left"
+                  class="btn btn-ghost btn-sm"
+                  title="Clear original text"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <textarea
+                id="left-text"
+                class="diff-textarea wrap"
+                placeholder="Paste or type original text here, or drag & drop a file..."
+                spellcheck="false"
+              ></textarea>
+            </div>
+            <div class="panel-footer">
+              <span id="left-stats">0 lines &middot; 0 characters</span>
+              <span class="text-faint">Original</span>
+            </div>
+          </div>
+
+          <!-- Right Panel: Changed Text -->
+          <div class="panel-card" id="right-panel">
+            <div class="drop-overlay">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Drop plain-text file here to load
+            </div>
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <span class="panel-title">Changed Text</span>
+                <span
+                  id="right-file-badge"
+                  class="file-badge"
+                  style="display: none"
+                >
+                  <span id="right-file-name"></span>
+                  <button id="right-file-remove" title="Remove file reference">
+                    &times;
+                  </button>
+                </span>
+              </div>
+              <div class="panel-actions">
+                <label
+                  class="btn btn-secondary btn-sm"
+                  title="Upload plain-text file (.txt, .md, .json, .csv, .html, .css, .js, .xml, .log, etc.)"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  Upload file
+                  <input
+                    type="file"
+                    id="right-file-input"
+                    hidden
+                    accept=".txt,.md,.json,.csv,.html,.css,.js,.xml,.log,.ts,.py,.yml,.yaml,.sql,.sh,.env,text/*"
+                  />
+                </label>
+                <button
+                  id="btn-clear-right"
+                  class="btn btn-ghost btn-sm"
+                  title="Clear changed text"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <textarea
+                id="right-text"
+                class="diff-textarea wrap"
+                placeholder="Paste or type changed text here, or drag & drop a file..."
+                spellcheck="false"
+              ></textarea>
+            </div>
+            <div class="panel-footer">
+              <span id="right-stats">0 lines &middot; 0 characters</span>
+              <span class="text-faint">Changed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison Options Card -->
+        <div class="options-card">
+          <div class="options-header">
+            <span class="options-title">Comparison Options</span>
+          </div>
+          <div class="options-grid">
+            <label
+              class="option-item"
+              title="Ignore letter case differences (e.g. 'Apple' matches 'apple')"
+            >
+              <input type="checkbox" id="opt-ignore-case" />
+              <span>Ignore case</span>
+            </label>
+            <label
+              class="option-item"
+              title="Ignore spaces and tabs at the beginning and end of each line"
+            >
+              <input type="checkbox" id="opt-ignore-leading-trailing" />
+              <span>Ignore leading/trailing whitespace</span>
+            </label>
+            <label
+              class="option-item"
+              title="Ignore all spaces and tabs across lines"
+            >
+              <input type="checkbox" id="opt-ignore-all-whitespace" />
+              <span>Ignore all whitespace differences</span>
+            </label>
+            <label
+              class="option-item"
+              title="Do not treat blank/empty lines as differences"
+            >
+              <input type="checkbox" id="opt-ignore-blank-lines" />
+              <span>Ignore blank lines</span>
+            </label>
+            <label
+              class="option-item"
+              title="Collapse large identical sections, keeping 3 lines of context around each change"
+            >
+              <input type="checkbox" id="opt-show-only-changed" checked />
+              <span>Show only changed lines (collapse unchanged)</span>
+            </label>
+            <label
+              class="option-item"
+              title="Wrap long lines in textareas and diff view"
+            >
+              <input type="checkbox" id="opt-word-wrap" checked />
+              <span>Word wrap</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Buttons Bar -->
+        <div class="action-bar">
+          <button
+            id="btn-swap-texts"
+            class="btn btn-secondary"
+            title="Swap original and changed texts"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M7 16V4m0 0L3 8m4-4l4 4m6 4v12m0 0l4-4m-4 4l-4-4" />
+            </svg>
+            Swap Texts
+          </button>
+          <button
+            id="btn-find-diff"
+            class="btn btn-primary btn-find-diff"
+            title="Find differences between the texts (Ctrl + Enter)"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Find Difference
+            <span class="kbd-shortcut" id="kbd-enter-hint">Ctrl+Enter</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Screen 2: Diff Result Screen -->
+      <section id="diff-screen" class="screen hidden">
+        <!-- Diff View Toolbar -->
+        <div class="diff-toolbar">
+          <div class="diff-toolbar-left">
+            <button
+              id="btn-edit-inputs"
+              class="btn btn-secondary btn-sm"
+              title="Return to input textareas (Esc)"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+              Edit Inputs
+              <span
+                class="kbd-shortcut"
+                style="
+                  color: var(--text-muted);
+                  background: var(--bg-panel-header);
+                "
+                >Esc</span
+              >
+            </button>
+
+            <div
+              class="view-mode-toggle"
+              role="tablist"
+              aria-label="Diff view layout"
+            >
+              <button
+                id="btn-view-split"
+                class="view-mode-btn active"
+                role="tab"
+                aria-selected="true"
+                title="Side-by-side split view"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <line x1="12" y1="3" x2="12" y2="21" />
+                </svg>
+                Split View
+              </button>
+              <button
+                id="btn-view-unified"
+                class="view-mode-btn"
+                role="tab"
+                aria-selected="false"
+                title="Inline unified view"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <line x1="3" y1="9" x2="21" y2="9" />
+                  <line x1="3" y1="15" x2="21" y2="15" />
+                </svg>
+                Unified View
+              </button>
+            </div>
+          </div>
+
+          <div class="diff-toolbar-center">
+            <div id="diff-summary-bar" class="diff-stats">
+              <!-- Dynamically updated -->
+            </div>
+          </div>
+
+          <div class="diff-toolbar-right">
+            <button
+              id="btn-prev-diff"
+              class="btn btn-secondary btn-sm"
+              title="Jump to previous difference (k or p)"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+              Prev
+            </button>
+            <span id="diff-nav-counter" class="nav-diff-counter">0 / 0</span>
+            <button
+              id="btn-next-diff"
+              class="btn btn-secondary btn-sm"
+              title="Jump to next difference (j or n)"
+            >
+              Next
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+
+            <button
+              id="btn-expand-all"
+              class="btn btn-secondary btn-sm"
+              title="Expand or collapse all unchanged sections"
+              style="display: none"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
+                />
+              </svg>
+              <span id="expand-all-text">Expand All</span>
+            </button>
+
+            <button
+              id="btn-toggle-wrap-diff"
+              class="btn btn-secondary btn-sm"
+              title="Toggle word wrapping in diff view"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="9 10 4 15 9 20"></polyline>
+                <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+              </svg>
+              <span id="diff-wrap-status">Wrap: ON</span>
+            </button>
+
+            <button
+              id="btn-copy-diff"
+              class="btn btn-secondary btn-sm"
+              title="Copy unified diff to clipboard"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                ></path>
+              </svg>
+              <span id="copy-diff-text">Copy Diff</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Diff Output Container -->
+        <div class="diff-container" id="diff-main-container">
+          <!-- View 1: Split View (Side by Side with Synchronized Scrolling) -->
+          <div id="split-view-container" class="diff-split-wrapper">
+            <!-- Left Column: Original Text -->
+            <div class="diff-split-column" id="split-column-left">
+              <div class="diff-column-header">
+                <span
+                  >Original:
+                  <span id="split-title-left" class="diff-column-header-title"
+                    >Original Text</span
+                  ></span
+                >
+              </div>
+              <div class="diff-pane-scroller" id="split-scroller-left">
+                <div class="diff-rows-container" id="split-rows-left">
+                  <!-- Left rows -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Changed Text -->
+            <div class="diff-split-column" id="split-column-right">
+              <div class="diff-column-header">
+                <span
+                  >Changed:
+                  <span id="split-title-right" class="diff-column-header-title"
+                    >Changed Text</span
+                  ></span
+                >
+              </div>
+              <div class="diff-pane-scroller" id="split-scroller-right">
+                <div class="diff-rows-container" id="split-rows-right">
+                  <!-- Right rows -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View 2: Unified View (Single Column) -->
+          <div
+            id="unified-view-container"
+            class="diff-unified-scroller"
+            style="display: none"
+          >
+            <div class="diff-rows-container" id="unified-rows">
+              <!-- Unified rows -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Site Footer -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="privacy-badge">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span
+            >Your text never leaves your browser. All computations are
+            local.</span
+          >
+        </div>
+        <div>
+          <span
+            >Keyboard: <kbd>Ctrl+Enter</kbd> Compare &middot; <kbd>j</kbd>/<kbd
+              >k</kbd
+            >
+            Next/Prev Diff &middot; <kbd>Esc</kbd> Edit</span
+          >
+        </div>
+      </div>
+    </footer>
+
+    <!-- Loading State Indicator -->
+    <div
+      id="loading-overlay"
+      class="loading-overlay"
+      aria-live="assertive"
+      role="alert"
+    >
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p style="font-weight: 600; font-size: 0.95rem">Comparing texts...</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted)">
+          Running Myers diff algorithm in browser
+        </p>
+      </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- JavaScript -->
+    <script src="./app.js"></script>
+  </body>
+</html>
